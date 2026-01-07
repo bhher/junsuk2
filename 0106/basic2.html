@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="" method="post">
+         <label>이름</label>
+         <input type="text" name="name" placeholder="이름 입력" required>
+         <!--required 필수입력  -->
+          <!-- password -->
+        <label>비밀번호</label>
+        <input type="password" name="pw">
+
+                <!-- radio -->
+        <label>성별</label>
+        <input type="radio" name="gender" value="M" checked> 남
+        <input type="radio" name="gender" value="F"> 여
+        <br/>
+
+        <!-- checkbox -->
+        <label>관심 분야</label>
+        <input type="checkbox" name="interest" value="java"> Java
+        <input type="checkbox" name="interest" value="html"> HTML
+        <input type="checkbox" name="interest" value="js"> JavaScript
+
+        <br/>
+                <!-- select -->
+        <label>지역</label>
+        <select name="area">
+            <option value="">선택</option>
+            <option value="seoul">서울</option>
+            <option value="gyeonggi">경기</option>
+            <option value="gang" selected>강원도</option>
+        </select>
+        <br>
+        <!-- textarea -->
+         <label for="">자기소개</label>
+        <textarea name="intro" id="intro" rows="4"></textarea>
+
+        <div class="btns">
+            <button type="submit">전송</button>
+            <button type="reset">초기화</button>
+        </div>
+    </form>
+</body>
+</html>
