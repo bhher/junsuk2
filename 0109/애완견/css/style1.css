@@ -1,0 +1,122 @@
+*{margin: 0;padding: 0;}
+#wrapper{
+    width: 900px;
+    margin: 0 auto;
+}
+header{
+    height:200px;
+    /* background-color:#f46075 ;
+    background-image: url(../img/nav2.png);
+    background-repeat: no-repeat;
+    background-position: 95% 40%; */
+    background:#f46075 url(../img/nav2.png) no-repeat 95% 40% ;
+}
+header h1{
+    float: left;
+    color:#fff;
+    margin-left: 50px;
+    margin-top: 65px;
+}
+header .logo{
+    float: right;
+    margin-top: 30px;
+    margin-right: 20px;
+}
+nav{
+   height:60px;
+   background-color: #ccc; 
+}
+nav ul{list-style: none;}
+/* 블릿감추기 */
+
+nav ul li{
+    float: left;
+    margin-left: 50px;
+    margin-top: 10px;
+    /* a넓이 높이주면 li크기와 동이 */
+}
+
+nav ul li a{
+    /* a태그 인라인요소 넓이 높이 X */
+    display: block;
+    width: 160px;
+    height:40px;
+    line-height: 40px;
+    /* 높이와 줄간격 같게하면 세로중앙정렬*/
+    /* background-color: pink; */
+    text-align: center;
+    /* 가로 중앙정렬 */
+    color:#000;
+    text-decoration: none;
+    /* a태그를 주면 밑줄생김 */
+    /* 밑줄없애기 */
+}
+/* a태그에 마우스를 올리면 */
+nav ul li a:hover{
+    background-color: #f46075;
+    font-weight: bold;
+    /* 글자진하게 */
+    color:#fff;
+    border-radius: 20px;
+    /* 모서리둥글게 */
+}
+main{
+    /* height: 550px; */
+    overflow: hidden;
+    /* section aside를 감싸는 main 
+    에게 높이를 부여 */
+}
+section{
+    width: 650px;
+    height: 550px;
+    float:left;
+    background-color: skyblue;
+}
+section h2{
+    text-align: center;
+    padding: 10px 0;
+}
+
+section article{
+    width:280px;
+    height:180px;
+    border: 1px solid #000;
+    float: left;
+    padding: 10px;
+    margin-left: 15px;
+    margin-top: 15px;
+}
+
+section article{
+    font-size: 13px;
+}
+article h3{
+    background: url(../img/bg.png) no-repeat;
+    padding-left: 30px;
+    padding-bottom: 10px;
+}
+article p{
+    text-align: justify;
+    /* 양쪽정렬 */
+}
+aside{
+    height:550px;
+    width:250px;
+    float: left;
+    background-color: #ffffcc;
+    text-align: center;
+}
+aside h2{
+    padding: 10px 0;
+}
+aside img{
+    padding-bottom: 10px;
+}
+footer{
+    height:50px;
+    line-height: 50px;
+    /* 높이 ==줄간격  세로중앙정렬 */
+    background-color: #333;
+    color:#fff;
+    text-align: center;
+}
