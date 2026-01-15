@@ -7,8 +7,8 @@ public class Main extends Object {
          // System.out.println(p1.name); 접근제어자 private 가 아니면 가능
         System.out.println(p1.getName());
         System.out.println(p1.getAge());
-        System.out.println(p1); 
-        System.out.println(p2);
+        System.out.println(p1.toString()); 
+        System.out.println(p2.toString());
 
     }
 }
