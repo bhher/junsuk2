@@ -1,0 +1,117 @@
+*{margin: 0;padding: 0;}
+
+.bigbox{
+    position: relative;
+    width: 1070px;
+    height: 900px;
+    margin: 100px auto 0;
+}
+.box{
+    width: 260px;
+    height:260px;
+    position: absolute;
+    display: none;
+}
+.box img{
+    width: 100%;
+    display: block;
+    
+}
+.box1{
+    display: block;
+    top: 0;
+    left: 0;
+}
+.box2{
+    display: block;
+    top: 0;
+    left: 270px;
+    height: 530px;
+    
+}
+.box3{
+    display: block;
+    top: 0;
+    left: 540px;
+}
+.box4{
+    display: block;
+    top: 0;
+    left: 810px;
+}.box5{
+    display: block;
+    top: 270px;
+    left: 0px;
+}.box6{
+    display: block;
+    top: 270px;
+    left: 540px;  
+    width:530px;
+}
+.box7{
+    display: block;
+    top: 540px;
+    left: 0;  
+}
+.box8{
+    display: block;
+    width:530px;
+    top: 540px;
+    left: 270px;  
+}
+
+.box9{
+    display: block;
+    top: 540px;
+    left: 810px;  
+}
+
+.box::before{
+    content: '';
+    position: absolute;
+    width: 0%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: rgba(0,0,255,0.7);
+    transition: all 0.5s;
+}
+.box:hover::before{
+    width: 100%;
+}
+.box6::before{
+    width: 100%;
+    height: 0;
+}
+.box6:hover::before{
+    height: 100%;
+}
+.box8::before{
+    width: 100%;
+    height: 0;
+}
+.box8:hover::before{
+    height: 100%;
+}
+.box p{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    color: #fff;
+    text-align: center;
+    padding-top: 30%;
+    box-sizing: border-box;
+    background: url(../img/more.png)no-repeat 50% 80%;
+    opacity: 0;
+    transition: all 0.5s;
+}
+.box2 p{
+   
+    padding-top: 70%;
+   
+}
+.box:hover p{
+    opacity: 1;
+}
