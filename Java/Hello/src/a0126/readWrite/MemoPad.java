@@ -15,7 +15,7 @@ public class MemoPad {
         Scanner sc = new Scanner(System.in);
 
         while (true) {
-             System.out.println("=== 메모장 프로그램 ===");
+           System.out.println("=== 메모장 프로그램 ===");
             System.out.println("1. 새 메모 작성");
             System.out.println("2. 메모 읽기");
             System.out.println("3. 메모 추가");
@@ -60,7 +60,7 @@ public class MemoPad {
 
 
     //출력 디렉토리(폴더) 확인 및 생성
-      File outputFile = new File(OUTPUT_FILE);
+      File outputFile = new File(OUTPUT_FILE);//c:/Users/TJ/memo/out2.txt"
       File parentDir = outputFile.getParentFile();//c:/Users/TJ/memo/
       if(parentDir != null && !parentDir.exists()){//폴더가 없으면
          parentDir.mkdirs(); //폴더를 만들어라  
@@ -103,7 +103,8 @@ public class MemoPad {
         if(line.isEmpty()){
             break;
         }
-        content.append(line).append("\n");
+        content.append(line).append("\n");//추가 + 엔터추가
+        //안녕하세요
       }
 
       //출력 디렉토리(폴더) 확인 및 생성

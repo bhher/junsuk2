@@ -34,5 +34,10 @@ public class StudentManager {
        }
        return (double) sum / list.size(); //초점을 인원수로 나눈다. 
     }
+
+    public void addStudent(String name, int score) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addStudent'");
+    }
     
 }
