@@ -7,7 +7,7 @@ public class FlightReservaionMain {
         FlightManager fm= new FlightManager();
         //FlightManager 객체생성과 동시에 더비 데이터 들어갈 예정(항공편정보)
         Scanner sc = new Scanner(System.in);
-        //FileC fc = new FileC();
+        FileC fc = new FileC();
         System.out.println(fm.airplane);
         System.out.println("==============JavaAir 에 오신걸 환영합니다.==============");
     
@@ -36,7 +36,13 @@ public class FlightReservaionMain {
                     break;
                 case 3:
                     fm.checkReservation();
-                    break;    
+                    break;
+                case 4:
+                    fm.ticketSave();
+                    break;  
+                 case 5:
+                    fc.upload();
+                    break;            
                 default:
                     break;
             }

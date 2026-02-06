@@ -8,13 +8,20 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class FlightManager {
-    private static ArrayList<Flight> flights; //항공편 정보
+    private static ArrayList<Flight> flights; //항공편 정보 하나만존재 static
+    public static ArrayList<Flight> getFlights() { 
+        return flights;
+    }
+    //항공편 목록을 외부에서 접근하는 gatter 메소드
     private static ArrayList<Passenger> passengers; //예약된 승객정보
+
+
+   
 
     //승객을 키로 하고, 예약된 항공편을 값으로 가지는 Map
     private static Map<String, Flight> reservationMap = new HashMap<>();
 
-    //private static FileC fc = new FileC(); //파일 작업관련
+    private static FileC fc = new FileC(); //파일 작업관련
     Scanner sc = new Scanner(System.in);
 
     public FlightManager(){
@@ -130,6 +137,7 @@ public class FlightManager {
         System.out.print("이름 : ");
         String name = sc.next();
         System.out.printf("생년월일(6자리):");
+       while(true){
         try {
             int birthDate = Integer.parseInt(sc.next());
             Passenger p= new Passenger(name, birthDate);
@@ -140,10 +148,12 @@ public class FlightManager {
                  String pw = sc.next();
                  p = new Passenger(name, birthDate, pw);
                  passengers.add(p); //항공 예약 명단에 추가 
+                 break; //성공했을때 종료
             }
-
+            
         } catch (DateTimeException e) {
            System.out.println("생년월일을 6자리로 입력해 주세요 ex)010225");
+        }
         }
      }
      public void checkReservation() {
@@ -197,6 +207,12 @@ public class FlightManager {
             }
         }
         return index;
+     }
+     public void ticketSave() {
+        int index = search("티켓조회");
+        checkPassword(index);
+        fc.ticketSaveFile(reservationMap, passengers.get(index).getName());
+
      }
     
 
