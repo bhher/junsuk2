@@ -77,6 +77,19 @@ public class User {
         reservationNumbers.clear();
         // 예매번호 초기화
     }
+    public void removeReservationsBymovie(String title) {
+       for(int i = reservedMovies.size()-1;i>=0;i--){
+            if(reservedMovies.get(i).equals(title)){
+                reservedMovies.remove(i);
+                reservedSeats.remove(i);
+                reservationNumbers.remove(i);
+            }
+       }
 
+    }
+    //List 삭제시 i = 0부터 증가하면서 하면 문제 발생가능
+    //뒤에서부터size-1 -> 0 도는게 안전합니다.
+    // reservedMovies.removeIf(movie -> movie.equals(title)); 가장깔끔
 
+    
 }
