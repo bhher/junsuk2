@@ -73,3 +73,52 @@
             // $('nav ul li').eq(i).addClass('on');
             return false;
         }); 
+
+        $('.container > div').mousewheel(function(event,d){
+            console.log(d); //마우스휠을 위로 양수 마우스 휠 아래로 음수
+            if(d > 0){
+               let preVal = $(this).prev().offset().top;
+                $('html,css').stop().animate({scrollTop:preVal},1000,'easeOutBounce');
+            } 
+            if(d < 0){ //휠아래로 동작감지(-1)
+              let  nextVal =  $(this).next().offset().top;
+              $('html,css').stop().animate({scrollTop:nextVal},1000,'easeOutBounce');
+            }
+
+ // 크롬에서 jquery.easing.1.3.js 검색  easing(이징) 효과 모음 - jQuery 공작소
+        });
+
+        $('#popup').draggable();
+
+        if($.cookie('pop') != 'no'){
+             $('#popup').show();
+        }
+
+        $('#popup area:eq(0)').click(function(){
+            $('#popup').fadeOut('fast');
+            //닫기 버튼 클릭하면 팝업을 서서히 숨긴다.
+        });
+
+
+       $('#popup area:eq(1)').click(function(){
+            
+            $.cookie('pop','no',{expires:1});
+            $('#popup').fadeOut('fast');
+            //닫기 버튼 클릭하면 팝업을 서서히 숨긴다.
+        });
+
+        $('#notice_wrap').draggable();
+        if($.cookie('popup') == 'none'){
+             $('#notice_wrap').hide();
+        }
+
+        // popup 변수에 none 저장되 있으면  $('#notice_wrap') 을 숨겨라
+        let chk = $('#expiresChk');
+        $('.closeBtn').on('click',closePop);
+
+        function closePop(){
+            if(chk.is(':checked')){ //chk 체크가 되있다면
+                 $.cookie('popup','none',{expires:3});
+            }
+            $('#notice_wrap').fadeOut();
+        }

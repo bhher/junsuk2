@@ -2,6 +2,17 @@
             var sct = $(this).scrollTop();//현재 스크롤 위치값(스크롤양)
             $('.s_Top').text(sct);
 
+            if(sct > 10){
+                $('.header_top').addClass('fixed');
+                $('.header_middle').addClass('fixed');
+                $('nav').addClass('fixed');
+            }else{
+                $('.header_top').removeClass('fixed');
+                $('.header_middle').removeClass('fixed');
+                $('nav').removeClass('fixed');
+            }
+
+
             if(sct >= 450 && sct < 1000 ){
                  $('.left1').addClass('on');
              }else{
