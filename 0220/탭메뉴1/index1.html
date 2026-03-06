@@ -1,63 +1,440 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>과일 정보 - 탭 메뉴 예제</title>
  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Malgun Gothic', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 2em;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 15px;
     }
 
     /* 탭 버튼 */
     .tab-buttons {
       display: flex;
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
     }
     .tab-buttons button {
-      padding: 10px 20px;
+      padding: 12px 25px;
       border: none;
       cursor: pointer;
-      background: #eee;
-      border-radius: 5px;
-      transition: background 0.3s;
+      background: #f0f0f0;
+      border-radius: 8px;
+      transition: all 0.3s;
+      font-size: 16px;
+      font-weight: 600;
+      color: #555;
+    }
+    .tab-buttons button:hover {
+      background: #ddd;
+      transform: translateY(-2px);
     }
     .tab-buttons button.active {
-      background: #007BFF;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
 
     /* 탭 내용 */
     .tab-content {
       display: none;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: 25px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fafafa;
+      animation: fadeIn 0.3s ease-in;
     }
     .tab-content.active {
       display: block;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .content-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .content-header h3 {
+      font-size: 28px;
+      color: #333;
+      margin-left: 15px;
+    }
+
+    .content-section {
+      margin-bottom: 25px;
+    }
+
+    .content-section h4 {
+      color: #667eea;
+      font-size: 20px;
+      margin-bottom: 10px;
+      padding-left: 10px;
+      border-left: 4px solid #667eea;
+    }
+
+    .content-section p {
+      line-height: 1.8;
+      color: #555;
+      margin-bottom: 15px;
+      text-align: justify;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .info-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .info-card strong {
+      color: #764ba2;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    ul li {
+      padding: 8px 0;
+      padding-left: 25px;
+      position: relative;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    ul li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 5px solid #f39c12;
+    }
+
+    .highlight-box p {
+      margin: 0;
+      color: #333;
+      font-weight: 600;
+    }
   </style>    
 </head>
 <body>
-    <h2>탭 메뉴 예제</h2>
+    <div class="container">
+      <h2>🍎 과일 정보 가이드 🍎</h2>
 
-<!-- html  data- 속성은 html 요소에 추가적인 사용자 정의 데이터를 저장 -->
- <!-- data-id, data-price -->
+      <!-- html  data- 속성은 html 요소에 추가적인 사용자 정의 데이터를 저장 -->
+      <!-- data-id, data-price -->
 
-  <!-- 탭 버튼 -->
-  <div class="tab-buttons">
-    <button class="tab-link active" data-tab="tab1">🍎 사과</button>
-    <button class="tab-link" data-tab="tab2">🍌 바나나</button>
-    <button class="tab-link" data-tab="tab3">🍇 포도</button>
-  </div>
+      <!-- 탭 버튼 -->
+      <div class="tab-buttons">
+        <button class="tab-link active" data-tab="tab1">🍎 사과</button>
+        <button class="tab-link" data-tab="tab2">🍌 바나나</button>
+        <button class="tab-link" data-tab="tab3">🍇 포도</button>
+        <button class="tab-link" data-tab="tab4">🍊 오렌지</button>
+        <button class="tab-link" data-tab="tab5">🍓 딸기</button>
+      </div>
 
-  <!-- 탭 내용 -->
-  <div id="tab1" class="tab-content active">사과는 빨갛고 달콤합니다.</div>
-  <div id="tab2" class="tab-content">바나나는 노랗고 길쭉합니다.</div>
-  <div id="tab3" class="tab-content">포도는 보라색이고 송이로 열립니다.</div>
+      <!-- 탭 내용 -->
+      <div id="tab1" class="tab-content active">
+        <div class="content-header">
+          <span style="font-size: 40px;">🍎</span>
+          <h3>사과 (Apple)</h3>
+        </div>
 
+        <div class="content-section">
+          <h4>📖 개요</h4>
+          <p>사과는 장미과 사과나무의 열매로, 전 세계에서 가장 널리 재배되는 과일 중 하나입니다. 빨간색, 초록색, 노란색 등 다양한 색깔을 가지고 있으며, 아삭한 식감과 달콤한 맛이 특징입니다.</p>
+        </div>
+
+        <div class="content-section">
+          <h4>💡 영양 정보</h4>
+          <div class="info-grid">
+            <div class="info-card">
+              <strong>칼로리</strong>
+              <span>100g당 약 52kcal</span>
+            </div>
+            <div class="info-card">
+              <strong>비타민 C</strong>
+              <span>일일 권장량의 14%</span>
+            </div>
+            <div class="info-card">
+              <strong>식이섬유</strong>
+              <span>100g당 약 2.4g</span>
+            </div>
+            <div class="info-card">
+              <strong>칼륨</strong>
+              <span>100g당 약 107mg</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section">
+          <h4>✨ 건강상의 이점</h4>
+          <ul>
+            <li>심장 건강 개선에 도움을 줍니다</li>
+            <li>콜레스테롤 수치를 낮추는 데 효과적입니다</li>
+            <li>소화를 돕고 장 건강을 촉진합니다</li>
+            <li>항산화 성분이 풍부하여 면역력 향상에 좋습니다</li>
+            <li>혈당 조절에 도움이 됩니다</li>
+          </ul>
+        </div>
+
+        <div class="highlight-box">
+          <p>💡 팁: 사과 껍질에는 영양소가 많이 함유되어 있으므로 깨끗이 씻어서 껍질째 드시는 것이 좋습니다!</p>
+        </div>
+      </div>
+
+      <div id="tab2" class="tab-content">
+        <div class="content-header">
+          <span style="font-size: 40px;">🍌</span>
+          <h3>바나나 (Banana)</h3>
+        </div>
+
+        <div class="content-section">
+          <h4>📖 개요</h4>
+          <p>바나나는 열대 지역에서 자라는 대형 초본 식물의 열매입니다. 노란색 껍질과 부드러운 흰색 과육을 가지고 있으며, 자연스럽게 포장된 완벽한 간식입니다. 전 세계에서 가장 인기 있는 과일 중 하나입니다.</p>
+        </div>
+
+        <div class="content-section">
+          <h4>💡 영양 정보</h4>
+          <div class="info-grid">
+            <div class="info-card">
+              <strong>칼로리</strong>
+              <span>100g당 약 89kcal</span>
+            </div>
+            <div class="info-card">
+              <strong>칼륨</strong>
+              <span>100g당 약 358mg</span>
+            </div>
+            <div class="info-card">
+              <strong>비타민 B6</strong>
+              <span>일일 권장량의 20%</span>
+            </div>
+            <div class="info-card">
+              <strong>탄수화물</strong>
+              <span>100g당 약 23g</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section">
+          <h4>✨ 건강상의 이점</h4>
+          <ul>
+            <li>칼륨이 풍부하여 혈압 조절에 도움이 됩니다</li>
+            <li>운동 전후 에너지 보충에 최적입니다</li>
+            <li>소화를 돕고 위 건강을 촉진합니다</li>
+            <li>트립토판이 함유되어 수면에 도움이 됩니다</li>
+            <li>항산화 성분이 풍부합니다</li>
+          </ul>
+        </div>
+
+        <div class="highlight-box">
+          <p>💡 팁: 바나나는 익을수록 당도가 높아지고 소화가 쉬워집니다. 반면 덜 익은 바나나는 저혈당 지수가 낮아 다이어트에 좋습니다!</p>
+        </div>
+      </div>
+
+      <div id="tab3" class="tab-content">
+        <div class="content-header">
+          <span style="font-size: 40px;">🍇</span>
+          <h3>포도 (Grape)</h3>
+        </div>
+
+        <div class="content-section">
+          <h4>📖 개요</h4>
+          <p>포도는 덩굴성 식물에서 자라는 둥근 열매로, 보라색, 초록색, 빨간색 등 다양한 색깔을 가지고 있습니다. 송이로 열리며, 신선하게 먹거나 주스, 와인 등으로 가공됩니다. 수천 년 전부터 재배되어 온 역사 깊은 과일입니다.</p>
+        </div>
+
+        <div class="content-section">
+          <h4>💡 영양 정보</h4>
+          <div class="info-grid">
+            <div class="info-card">
+              <strong>칼로리</strong>
+              <span>100g당 약 69kcal</span>
+            </div>
+            <div class="info-card">
+              <strong>비타민 K</strong>
+              <span>일일 권장량의 18%</span>
+            </div>
+            <div class="info-card">
+              <strong>비타민 C</strong>
+              <span>일일 권장량의 10%</span>
+            </div>
+            <div class="info-card">
+              <strong>레스베라트롤</strong>
+              <span>항산화 성분 풍부</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section">
+          <h4>✨ 건강상의 이점</h4>
+          <ul>
+            <li>레스베라트롤이 풍부하여 심장 건강에 좋습니다</li>
+            <li>뇌 건강과 인지 기능 향상에 도움이 됩니다</li>
+            <li>혈당 조절에 도움이 됩니다</li>
+            <li>눈 건강을 보호하는 루테인과 제아잔틴이 함유되어 있습니다</li>
+            <li>면역력 강화에 효과적입니다</li>
+          </ul>
+        </div>
+
+        <div class="highlight-box">
+          <p>💡 팁: 포도는 껍질과 씨에 영양소가 많이 함유되어 있으므로 가능하면 통째로 드시는 것이 좋습니다!</p>
+        </div>
+      </div>
+
+      <div id="tab4" class="tab-content">
+        <div class="content-header">
+          <span style="font-size: 40px;">🍊</span>
+          <h3>오렌지 (Orange)</h3>
+        </div>
+
+        <div class="content-section">
+          <h4>📖 개요</h4>
+          <p>오렌지는 감귤류 과일로, 밝은 주황색 껍질과 달콤하고 시큼한 과육을 가지고 있습니다. 비타민 C의 대표적인 공급원으로 알려져 있으며, 겨울철 감기 예방에 특히 좋습니다. 주스로도 많이 섭취되는 인기 있는 과일입니다.</p>
+        </div>
+
+        <div class="content-section">
+          <h4>💡 영양 정보</h4>
+          <div class="info-grid">
+            <div class="info-card">
+              <strong>칼로리</strong>
+              <span>100g당 약 47kcal</span>
+            </div>
+            <div class="info-card">
+              <strong>비타민 C</strong>
+              <span>일일 권장량의 88%</span>
+            </div>
+            <div class="info-card">
+              <strong>엽산</strong>
+              <span>일일 권장량의 10%</span>
+            </div>
+            <div class="info-card">
+              <strong>칼륨</strong>
+              <span>100g당 약 181mg</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section">
+          <h4>✨ 건강상의 이점</h4>
+          <ul>
+            <li>비타민 C가 풍부하여 면역력 강화에 탁월합니다</li>
+            <li>콜라겐 생성에 도움을 주어 피부 건강에 좋습니다</li>
+            <li>심장 건강을 개선하는 데 도움이 됩니다</li>
+            <li>철분 흡수를 촉진합니다</li>
+            <li>항산화 성분이 풍부하여 염증 완화에 효과적입니다</li>
+          </ul>
+        </div>
+
+        <div class="highlight-box">
+          <p>💡 팁: 오렌지는 껍질을 벗긴 후 바로 드시는 것이 좋습니다. 비타민 C는 공기에 노출되면 쉽게 파괴되기 때문입니다!</p>
+        </div>
+      </div>
+
+      <div id="tab5" class="tab-content">
+        <div class="content-header">
+          <span style="font-size: 40px;">🍓</span>
+          <h3>딸기 (Strawberry)</h3>
+        </div>
+
+        <div class="content-section">
+          <h4>📖 개요</h4>
+          <p>딸기는 장미과 딸기속 식물의 열매로, 빨간색의 하트 모양이 특징입니다. 작은 씨앗들이 표면에 박혀있으며, 달콤하고 새콤한 맛이 일품입니다. 봄철 대표 과일로, 신선한 딸기는 향이 매우 좋습니다.</p>
+        </div>
+
+        <div class="content-section">
+          <h4>💡 영양 정보</h4>
+          <div class="info-grid">
+            <div class="info-card">
+              <strong>칼로리</strong>
+              <span>100g당 약 32kcal</span>
+            </div>
+            <div class="info-card">
+              <strong>비타민 C</strong>
+              <span>일일 권장량의 97%</span>
+            </div>
+            <div class="info-card">
+              <strong>망간</strong>
+              <span>일일 권장량의 19%</span>
+            </div>
+            <div class="info-card">
+              <strong>엽산</strong>
+              <span>일일 권장량의 6%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section">
+          <h4>✨ 건강상의 이점</h4>
+          <ul>
+            <li>비타민 C가 레몬보다 많아 면역력 강화에 최고입니다</li>
+            <li>안토시아닌이 풍부하여 심장 건강에 좋습니다</li>
+            <li>항산화 성분이 많아 노화 방지에 효과적입니다</li>
+            <li>혈당 조절에 도움이 됩니다</li>
+            <li>뇌 건강과 인지 기능 향상에 도움이 됩니다</li>
+          </ul>
+        </div>
+
+        <div class="highlight-box">
+          <p>💡 팁: 딸기는 씻은 후 바로 드시는 것이 좋습니다. 보관할 때는 물기를 제거하고 냉장 보관하세요!</p>
+        </div>
+      </div>
+
+    </div>
 </body>
 </html>
 <script>
@@ -66,7 +443,7 @@
 
     tabLinks.forEach(function(button){
         button.addEventListener('click',function(){
-           const targetId =  button.getAttribute("data-tab"); //tab1, tab2, tab3
+           const targetId =  button.getAttribute("data-tab"); //tab1, tab2, tab3, tab4, tab5
 
            //모든 버튼을 비활성화
            tabLinks.forEach(btn => btn.classList.remove('active'));
