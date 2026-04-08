@@ -8,12 +8,52 @@ import express from 'express'; //웹서버, 라우팅
 import cors from 'cors'; //다른출처 react(5173) 에서 이 api 호출 가능하게
 import session from 'express-session'; //로그인후 세션id만들고, 쿠키로 브라우저에 줄때
 import { pool } from './db.js'; //mysql 에 연결 member 테이블 조회
+import multer from 'multer'; //파일 업로드 
+import fs from 'fs'; // 파일 시스템 - 파일 읽기 쓰기 폴더관리
+import { dirname, join, extname } from 'path'; //dirname - 폴더경로만 join '\' 폴더조각맞춰줌   extname -확장자추출
+import { fileURLToPath } from 'url'; //브라우저 방식file://... ,  c:\... -> 컴퓨터 방식주소변경 
 
-const PORT = Number(process.env.PORT, 10) || 3002; //서버포트
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';// react(5173) 온 요청만 허용(쿠키포함)
-const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';//세션아이디 암호화
+
+const __dirname = dirname(fileURLToPath(import.meta.url)); //현재 파일 위치 기준
+const UPLOAD_DIR = join(__dirname, 'uploads'); // /project/server/uploads
+/** 서버 기동 시 업로드 디렉터리가 없으면 생성 */
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+/** multer: 디스크에 저장할 경로·파일명 규칙 (타임스탬프 + 랜덤 + 확장자) */
+//  어디에 / 어떻게 저장할지
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR), //uploaes 폴더에 저장
+  filename: (_req, file, cb) => {
+    const ext = extname(file.originalname) || '.jpg';
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 10)}${ext}`);
+  }, //17428985456-ab12cd56.jpg
+  //36진수 (0-9 + a-z) .slice(2, 10) 앞에 0을떼고 8글자만 가져옮
+  //cb는 콜백  cb callback 첫번째 인자가(에러발생여부) null  성공, 고유의파일명 multer전달
+});
+
+/** multer 인스턴스: 단일 이미지 필드, 5MB 제한, JPEG/PNG/GIF/WebP만 허용 */
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, //파일크기제한
+  fileFilter: (_req, file, cb) => {
+    const ok = /^image\/(jpeg|png|gif|webp)$/.test(file.mimetype);
+    cb(ok ? null : new Error('JPEG, PNG, GIF, WebP 이미지만 업로드할 수 있습니다.'), ok);
+  },
+});
+
+const PORT = Number(process.env.PORT, 10) || 3002;
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'kculture-dev-secret-change-in-production';
 
 const app = express();
+
+app.set('trust proxy', 1);
+
+
+
+
 
 app.use(
   cors({//브라우저 : fetch(credentials:'include') 로 쿠키를 실어보낼수있게함 
@@ -95,6 +135,46 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+app.post('/api/auth/join', async (req, res) => {
+  try {
+    const { email, password,name, nationality, language } = req.body; //res.body에서 email, password 읽음
+    if (!email || !password || !name) {
+      res.status(400).json({ error: 'email, password , and name are required.' });
+      return;
+    }
+    //DB 이메일 중복확인
+    const [dup] = await pool.query('SELECT * FROM member WHERE email = ? ', [
+      email,
+    ]);
+    if (dup.length > 0) {//같은 이메일이 있으면
+      res.status(409).json({ error: 'Email already exists.' });
+      return;
+    }
+    const [result] = await pool.query(
+      'INSERT INTO member (email, password, name, nationality, language) VALUES (?, ?, ?, ?, ?)',
+      [email, password, name, nationality || null, language || 'en']
+      //nationality 는 없으면 null , language 없으면 en']
+    );
+    req.session.memberId = result.insertId; //새로 생긴 회원의 id가 들어온다. 가입직후 세션에 회원id를 넣는다. - 가입동시 로그인
+    const [rows] = await pool.query(
+      'SELECT id, email, name, nationality, language FROM member WHERE id = ?',
+      [result.insertId]
+    );
+    //방금 넣은 id로 select 해서 비밀번호 제회 필드만 가져온다.
+  res.status(201).json({ member: mapMemberRow(rows[0]) });
+   // 201 created 성공메시지 200 ok: 요청을 잘처리  201 -  없던것이 생성 성공 메시지
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error.' });
+  }
+});
+//이메일 중복검사 -> 회원 insert, 세션에 memberId 넣고 -> 비번없는 회원 정보 json으로 201 응닫하는 
+//회원가입 api 
+
+
+
+
+
 app.post('/api/auth/logout', (req, res) => {
   req.session.destroy((err) => {//세션 삭제
     if (err) {
@@ -105,6 +185,143 @@ app.post('/api/auth/logout', (req, res) => {
     res.json({ ok: true });
   });
 });
+
+// categories
+/** ---------- categories ---------- 카테고리 목록만 부른것임 */
+app.get('/api/categories', async (_req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, code, name_en AS nameEn, name_ko AS nameKo, icon, sort_order AS sortOrder FROM category ORDER BY sort_order'
+    );
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error.' });
+  }
+});
+//sql 에서 가져올 컬럼들을 미리 정의
+//p.id  p.title  - 코드 중복방지 유지보수가 편하게 
+// List = 목록   Detail = 상세페이지용(nationality 추가)
+const POST_SELECT_LIST = `p.id, p.category_id AS categoryId, p.member_id AS memberId, p.title, p.content,
+        p.image_filename AS imageFilename, p.view_count AS viewCount, p.created_at AS createdAt, p.updated_at AS updatedAt,
+        m.name AS memberName, c.name_en AS categoryName, c.icon AS categoryIcon`;
+
+const POST_SELECT_DETAIL = `p.id, p.category_id AS categoryId, p.member_id AS memberId, p.title, p.content,
+      p.image_filename AS imageFilename, p.view_count AS viewCount, p.created_at AS createdAt, p.updated_at AS updatedAt,
+      m.name AS memberName, m.nationality, c.name_en AS categoryName, c.icon AS categoryIcon`;
+
+/** ---------- posts list ---------- */
+//요청 - 조건확인 - sql 실행 - 결과 + 페이지 정보반환
+app.get('/api/posts', async (req, res) => { //GET 요청으로 게시글 목록을 가져오는 api 
+  try {
+    const categoryId = Number(req.query.categoryId) || 0; //카테고리 필터
+    const page = Math.max(1, Number(req.query.page) || 1); //현재페이지
+    const pageSize = Math.min(50, Math.max(1, Number(req.query.pageSize) || 10)); //한페이지 글의 갯수
+    const start = (page - 1) * pageSize;
+    //1페이지 (1-1) * 10 =0 ->0번데이터부터 10개가져와라(1-10)
+    //2페이지 (2-1) *10 10번 데이터 부터 10가져와라 (11-20)
+      //3페이지 (3-1) *10 20번 데이터 부터 10가져와라 (21-30)
+
+    let listSql;
+    let countSql;
+    const params = [];
+    if (categoryId > 0) { //특정 카테고리만 조회 - 글 + 작성자 + 카테고리 같이가져옴
+      listSql = `SELECT ${POST_SELECT_LIST} 
+        FROM post p JOIN member m ON p.member_id = m.id JOIN category c ON p.category_id = c.id
+        WHERE p.category_id = ? ORDER BY p.created_at DESC LIMIT ?, ?`;
+      params.push(categoryId, start, pageSize);
+      countSql = 'SELECT COUNT(*) AS cnt FROM post WHERE category_id = ?';
+    } else {
+      listSql = `SELECT ${POST_SELECT_LIST}
+        FROM post p JOIN member m ON p.member_id = m.id JOIN category c ON p.category_id = c.id
+        ORDER BY p.created_at DESC LIMIT ?, ?`;
+      params.push(start, pageSize);
+      countSql = 'SELECT COUNT(*) AS cnt FROM post';
+    }
+
+    const [list] = await pool.query(listSql, params); //글목록 가져오기
+    const [countRows] =
+      categoryId > 0
+        ? await pool.query(countSql, [categoryId]) //카테고리가 있는 총갯수 
+        : await pool.query(countSql); //모든 총갯수
+    const total = countRows[0]?.cnt ?? 0;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    //총페이지   글 26개 / 페이지 10 개  -> 3페이지
+    res.json({ //응답 반환
+      posts: list,
+      total,
+      page,
+      pageSize,
+      totalPages,
+      categoryId,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error.' });
+  }
+});
+ //게시글 목을 조건 + 페이지 에 맞게 DB에서 가져와서 Json으로 반환하는 api
+//react가 받는 데이터
+// {
+//   "posts": [...],
+//   "total": 100,
+//   "page": 1,
+//   "pageSize": 10,
+//   "totalPages": 10,
+//   "categoryId": 0
+// }
+
+//post : 게시글 작성 
+// requireAuth(로그인 체크) , upload.single('image') 파일 업로드 처리 실제로직실행
+//로그인테크->파일업로드 -> 데이터 검증 -> db저장 -> 결과반환
+app.post('/api/posts', requireAuth, (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      res.status(400).json({ error: err.message || 'Upload failed.' });
+      return; //파일크기 초가/ 확장자 문제등을 처리
+    }
+    next();
+  });
+}, async (req, res) => {
+  try {
+    const categoryId = Number(req.body.categoryId);
+    const title = req.body.title;
+    const content = req.body.content;
+    if (!categoryId || !title || String(title).trim() === '') {
+      res.status(400).json({ error: 'categoryId and title are required.' });
+      return;
+    }
+    let imageFilename = null;
+    if (req.file) { //이미지파일 - 업로드된 파일 있으며
+      imageFilename = req.file.filename; //파일명 저장
+    }
+    const [result] = await pool.query( //DB저장
+      'INSERT INTO post (category_id, member_id, title, content, image_filename) VALUES (?, ?, ?, ?, ?)',
+      [
+        categoryId,
+        req.session.memberId, //세션 저장 id - 로그인사용자
+        String(title).trim(), //제목 trim처리
+        content != null ? String(content) : '', // 내용 null 방지
+        imageFilename,
+      ]
+    );
+    res.status(201).json({ id: result.insertId }); //저장 성공시 201과 아이디 반환
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error.' });
+  }
+});
+
+//세션에 로그인(memberId) 가 덦으면 401, 있으면 다음 미들웨어로 
+function requireAuth(req, res, next) {
+  if (!req.session.memberId) {
+    res.status(401).json({ error: 'Login required.' });
+    return;
+  }
+  next();
+}
+
+
 
 app.listen(PORT, () => {
   console.log(`Login API (DB) http://localhost:${PORT}`);
