@@ -5,7 +5,7 @@ import React from 'react'
 import Layout from './components/Layout';
 import JoinPage from './pages/JoinPage';
 import HomePage from './pages/HomePage';
-
+import WritePage from './pages/WritePage';
 
 function App() {
   return (
@@ -14,6 +14,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path='login' element={<LoginPage/>}/>
           <Route path='join' element={<JoinPage/>}/>
+           <Route path="write" element={<WritePage />} />
         </Route>
     </Routes>
   )

@@ -76,6 +76,8 @@ app.use(
     },
   })
 );
+/** 업로드 이미지 브라우저 제공 — HomePage 썸네일 등 `/uploads/파일명` */
+app.use('/uploads', express.static(UPLOAD_DIR));
 //DB에서 가져온 한 행에서 api로 내려줄 필드만 골라서객체로만듦
 // - 비밀번호 넣지않음- 응답에 비번 나가면 안됨 
 function mapMemberRow(row) {
