@@ -314,6 +314,83 @@ app.post('/api/posts', requireAuth, (req, res, next) => {
   }
 });
 
+// 수정  patch - 부분수정 put-전체수정 
+app.patch('/api/posts/:id', requireAuth, (req, res, next) => {
+  upload.single('image')(req, res, (err) => { //image 이름으로 파일업로드 바등ㅁ
+    if (err) { //res.file -저장
+      res.status(400).json({ error: err.message || 'Upload failed.' });
+      return; //파일크기 초가/ 확장자 문제등을 처리
+    }
+    next();
+  });
+}, async (req, res) => {
+  try {
+    const id= Number(req.params.id);
+    const title = req.body.title;
+    const content = req.body.content;
+    const removeImage = req.body.removeImage === '1' || req.body.removeImage === 'true';
+    if (!id) {
+      res.status(400).json({ error: 'Invalid id.' });
+      return;
+    }
+//권한체크 - 기존 게시글 조회
+ const [rows] = await pool.query(
+      'SELECT image_filename AS imageFilename FROM post WHERE id = ? AND member_id = ?',
+      [id, req.session.memberId]
+    );
+    if (!rows.length) { //글이 없거나 남의 글이면 -> 접근금지
+      res.status(403).json({ error: 'Forbidden or not found.' });
+      return;
+    }
+    const oldName = rows[0].imageFilename; //기존 이미지 파일 저장
+    let newName = oldName;
+    if (removeImage) { //이미지 삭제처리
+      await unlinkImageFilename(oldName);
+      newName = null;
+    }
+    if (req.file) {//새로운 이미지 올라오면 
+      await unlinkImageFilename(oldName); //기존이미지 삭제
+      newName = req.file.filename; //새파일명 저장
+    }
+    const [r] = await pool.query( //db업데이트
+      'UPDATE post SET title = ?, content = ?, image_filename = ? WHERE id = ? AND member_id = ?',
+      [
+        String(title ?? '').trim(),
+        content != null ? String(content) : '',
+        newName,
+        id,
+        req.session.memberId,
+      ]
+    );
+    //실제로 수정된 행이 없으면 실패
+    if (r.affectedRows === 0) {
+      res.status(403).json({ error: 'Forbidden or not found.' });
+      return;
+    }
+    res.json({ ok: true }); //성공응답
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error.' });
+  }
+
+});
+
+//안전 삭제 - async 비동기함수(파일 삭제 기다림)
+async function unlinkImageFilename(filename) { //filename - 삭에 파일이름
+  if (!filename || typeof filename !== 'string') return; //유효성 - filename없거나 null이나 숫자방지
+  if (filename.includes('..') || /[\\/]/.test(filename)) return;
+  // ../../etc/paswd - 서버 파일 접근시도 또는 '/' - 리눅스 경로 차단  '\' 윈도우 경로 차단 
+  const full = join(UPLOAD_DIR, filename); //실제 경로 생성 - 안전하게 경로 합침
+  try {
+    await fs.promises.unlink(full); //실제 파일 삭제
+  } catch {
+    /* ignore */
+  }
+}
+
+
+
+
 /** 게시글 ID 한 건: 상세 컬럼으로 JOIN 조회, 없으면 null */
 // '글 한건만' 가져오기
 async function loadPostRow(id) {
@@ -355,6 +432,13 @@ app.get('/api/posts/:id', async (req, res) => {
     //조건  WHERE c.post_id = ? 해당 게시글의 댓글만 조회
     // 댓글 + 작성자 정보를 Join해서 특정 게시글 기준으로 가져오는 쿼리
 
+ res.json({ post, comments });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error.' });
+  }
+});
+
 // [
 //   {
 //     id: 1,
@@ -366,6 +450,50 @@ app.get('/api/posts/:id', async (req, res) => {
 //     nationality: "Korea"
 //   }
 // ]
+
+/** GET: 편집 폼용 데이터 (본인 글만, 조회수 증가 없음) */
+// /api/posts/:id/edit 로그인체크 -> id 유효성검사 - 게시글조회 - 작성자보인인지 - 데이터반환
+
+//로그인이 안되있으면 여기 출입이 안됨 requireAuth
+app.get('/api/posts/:id/edit', requireAuth, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!id) {  //잘못된 url /posts/sdfds
+      res.status(404).json({ error: 'Not found.' });
+      return;
+    }
+    const post = await loadPostRow(id); //게시글조회(id)
+    if (!post) { //게시글 없으면 404
+      res.status(404).json({ error: 'Not found.' });
+      return;
+    }
+    if (post.memberId !== req.session.memberId) { //작성자 본인 확인
+      res.status(403).json({ error: 'Forbidden.' });
+      return;
+    }
+    res.json({ post }); //json형식으로 받는다.
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error.' });
+  }
+});
+
+// {
+//   "post": {
+//     "id": 16,
+//     "title": "제목",
+//     "content": "내용",
+//     "imageFilename": "abc.jpg",
+//     "memberId": 3
+//   }
+// }
+
+
+
+
+
+
 /** ---------- comments ---------- */
 
 /** POST: 특정 글에 댓글 추가 (로그인 사용자) */
@@ -397,12 +525,7 @@ app.post('/api/posts/:id/comments', requireAuth, async (req, res) => {
 
 
 
-    res.json({ post, comments });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: 'Database error.' });
-  }
-});
+
 
 
 
