@@ -314,6 +314,100 @@ app.post('/api/posts', requireAuth, (req, res, next) => {
   }
 });
 
+/** 게시글 ID 한 건: 상세 컬럼으로 JOIN 조회, 없으면 null */
+// '글 한건만' 가져오기
+async function loadPostRow(id) {
+  const [rows] = await pool.query(
+    `SELECT ${POST_SELECT_DETAIL}
+      FROM post p JOIN member m ON p.member_id = m.id JOIN category c ON p.category_id = c.id WHERE p.id = ?`,
+    [id]
+  );
+  return rows[0] ?? null;
+}
+//url로 넘어온 숫자 id로 post 한 줄을 찾고 , 작성자(member), 카테고리(category) join 같이 붙임
+//POST_SELECT_DETAIL 이라서 목록보다 상세용 컬럼(ex - nationality)이 포함
+//없으면 null 있으면 객체한개를 돌려줍니다.
+
+/** ---------- post detail (+ view++) ---------- */
+app.get('/api/posts/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id); //숫자 id 로 변환
+    if (!id) { //  0/null 이면 404
+      res.status(404).json({ error: 'Not found.' });
+      return;
+    }
+    const post = await loadPostRow(id);
+    if (!post) {
+      res.status(404).json({ error: 'Not found.' });
+      return;
+    }
+    //디비 조회수 증가 업데이트
+    await pool.query('UPDATE post SET view_count = view_count + 1 WHERE id = ?', [id]);
+    post.viewCount = (post.viewCount ?? 0) + 1; //클라이언트에 증가해서 보냄
+
+    const [comments] = await pool.query(//특정 게시글 댓글목록을 db에서 조회 comments배열에 저장
+      `SELECT c.id, c.post_id AS postId, c.member_id AS memberId, c.content, c.created_at AS createdAt,
+        m.name AS memberName, m.nationality
+        FROM comment c JOIN member m ON c.member_id = m.id WHERE c.post_id = ? ORDER BY c.created_at`,
+      [id]
+    );
+    //comment 댓글테이블과 member 작성테이블 join -> 댓글 + 작성자 정보같이 가져옴
+    //조건  WHERE c.post_id = ? 해당 게시글의 댓글만 조회
+    // 댓글 + 작성자 정보를 Join해서 특정 게시글 기준으로 가져오는 쿼리
+
+// [
+//   {
+//     id: 1,
+//     postId: 10,
+//     memberId: 3,
+//     content: "댓글 내용",
+//     createdAt: "2026-04-09",
+//     memberName: "홍길동",
+//     nationality: "Korea"
+//   }
+// ]
+/** ---------- comments ---------- */
+
+/** POST: 특정 글에 댓글 추가 (로그인 사용자) */
+//post -> 데이터생성(댓글작성)
+///api/posts/16/comments -> 특정게시글 댓글
+// requireAuth 로그인 필수
+app.post('/api/posts/:id/comments', requireAuth, async (req, res) => {
+  try {
+    const postId = Number(req.params.id); //16 url에서 가져온 id
+    const { content } = req.body; // 입력한 댓글 내용
+    if (!postId || !content || String(content).trim() === '') {
+      res.status(400).json({ error: 'content is required.' });
+      return;
+    }
+    const [result] = await pool.query(
+      'INSERT INTO comment (post_id, member_id, content) VALUES (?, ?, ?)',
+      [postId, req.session.memberId, String(content).trim()]
+      // req.session.memberId -> 로그인한 아이디
+    );
+    res.status(201).json({ id: result.insertId }); //201->생성성공  / insertId-방금 생성된 댓글아이디
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error.' });
+  }
+});
+
+
+
+
+
+
+    res.json({ post, comments });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error.' });
+  }
+});
+
+
+
+
+
 //세션에 로그인(memberId) 가 덦으면 401, 있으면 다음 미들웨어로 
 function requireAuth(req, res, next) {
   if (!req.session.memberId) {
@@ -322,6 +416,12 @@ function requireAuth(req, res, next) {
   }
   next();
 }
+
+
+
+
+
+
 
 
 

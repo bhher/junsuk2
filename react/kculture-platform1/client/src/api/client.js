@@ -81,9 +81,16 @@ export const api = {
     return request(`/api/posts${s ? `?${s}` : ''}`); // /api/posts?categoryId=2&page=3
   },
   
+  //get : 글상세 + 댓글 (서버에서 조회수 증가)
+  getPost:(id) => request(`/api/posts/${id}`),  
   //post 새 글  multipart Formdata(이미지 필드 포함)
   createPost:(formData) => requestForm('/api/posts','POST',formData),  //게시글
 
+  /** POST: 해당 글에 댓글 작성 (JSON body) */
+  createComment: (postId, body) =>
+    request(`/api/posts/${postId}/comments`, { method: 'POST', json: body }),
+  /** GET: 현재 세션 로그인 여부·회원 정보 */
+  me: () => request('/api/auth/me'),
 
 
   login: (body) => request('/api/auth/login', { method: 'POST', json: body }),
