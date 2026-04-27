@@ -96,7 +96,8 @@ export const api = {
     request(`/api/posts/${postId}/comments`, { method: 'POST', json: body }),
   /** GET: 현재 세션 로그인 여부·회원 정보 */
   me: () => request('/api/auth/me'),
-
+  /** DELETE: 글 삭제 */
+  deletePost: (id) => request(`/api/posts/${id}`, { method: 'DELETE' }),
 
   login: (body) => request('/api/auth/login', { method: 'POST', json: body }),
   logout: () => request('/api/auth/logout', { method: 'POST' }),

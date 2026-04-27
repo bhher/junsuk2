@@ -375,6 +375,36 @@ app.patch('/api/posts/:id', requireAuth, (req, res, next) => {
 
 });
 
+
+/** DELETE: 본인 글 삭제 (첨부 이미지 파일도 함께 삭제) */
+app.delete('/api/posts/:id', requireAuth, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const [prev] = await pool.query( //본인글 조회, 이미지 파일명 가져오기
+      'SELECT image_filename AS imageFilename FROM post WHERE id = ? AND member_id = ?',
+      [id, req.session.memberId]
+    );
+    const [r] = await pool.query('DELETE FROM post WHERE id = ? AND member_id = ?', [
+      id,
+      req.session.memberId,
+    ]);
+    if (r.affectedRows === 0) {
+      res.status(403).json({ error: 'Forbidden or not found.' });
+      return;
+    }
+    if (prev[0]?.imageFilename) {
+      await unlinkImageFilename(prev[0].imageFilename);
+    } //db 삭제 성공후 이미지 파일(실제파일도 삭제)도 삭제
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error.' });
+  }
+});
+
+
+
+
 //안전 삭제 - async 비동기함수(파일 삭제 기다림)
 async function unlinkImageFilename(filename) { //filename - 삭에 파일이름
   if (!filename || typeof filename !== 'string') return; //유효성 - filename없거나 null이나 숫자방지
