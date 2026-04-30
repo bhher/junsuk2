@@ -17,8 +17,9 @@ import java.util.List;
 @Slf4j
 public class ArticleApiController {
 
-    @Autowired
-    private ArticleRepository articleRepository;
+//    @Autowired
+//    private ArticleRepository articleRepository;
+
     @Autowired
     private ArticleService articleService;
 
