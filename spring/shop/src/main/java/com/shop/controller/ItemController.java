@@ -61,7 +61,7 @@ public class ItemController {
 
     //수정상품 화면에 불러오기(이미지 포함)
     @GetMapping(value = "/admin/item/{itemId}")
-    public String itemDtl(@PathVariable("itemId") Long itemId, Model model){
+    public String itemDtl1(@PathVariable("itemId") Long itemId, Model model){
         try {
             ItemFormDto itemFormDto = itemService.getItemDtl(itemId);
             model.addAttribute("itemFormDto", itemFormDto);
@@ -114,6 +114,18 @@ public String itemManage(ItemSearchDto itemSearchDto, @PathVariable("page") Opti
 
     return "item/itemMng";
 }
+
+
+//상세보기
+
+@GetMapping(value = "/items/{itemId}")
+public String itemDtl(Model model, @PathVariable("itemId") Long itemId){
+      ItemFormDto itemFormDto =  itemService.getItemDtl(itemId);
+     model.addAttribute("item", itemFormDto);
+    return "item/itemDtl";
+}
+
+
 
 
 
