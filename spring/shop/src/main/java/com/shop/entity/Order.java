@@ -34,9 +34,48 @@ public class Order extends  BaseEntity{
     // orphanRemoval = true
     // post.getComments().remove(0) - 게시글(부모) 은 그대로 두고
     // 댓글리스트에서 특정 댓글 삭제
-
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    public void addOrderItem(OrderItem orderItem){
+        orderItems.add(orderItem); //Order 안의 리스트추가
+        orderItem.setOrder(this); //OrderItem 에 현재 Order 설정
+    }
+
+
+    public static Order createOrder(Member member, List<OrderItem> orderItemList) {
+        Order order = new Order();
+        order.setMember(member); //1. 주문한 회원 정보 설정
+
+        //2. 여러개의 주문 상품(OrderItem)을 주문 객체에 연결
+
+        for (OrderItem orderItem : orderItemList) {
+            order.addOrderItem(orderItem);
+            //여기서  addOrderItem 메서드는 단순히 리슻에 담는 것을 넘어
+            // orderItem 객체에도 Order 정보를 세팅해주는 양방향 연관관계 편의 메서드
+
+            order.setOrderStatus(OrderStatus.ORDER); //3. 주문 상태를 'ORDER' 초기화
+            order.setOrderDate(LocalDateTime.now()); //4. 현재 시간을 주문 시간으로 설정
+        }
+            return order;
+        }
+
+        public int getTotalPrice(){
+            int totalPrice = 0;
+            for(OrderItem orderItem : orderItems){
+                totalPrice += orderItem.getTotalPrice();
+            }
+            return totalPrice;
+        }
+//Item 개당 가격 정보
+// OrderItem (상품가격 X 수량)
+// Order 각 OrderItem의 결과값
+public void cancelOrder() {
+    this.orderStatus = OrderStatus.CANCEL;
+    for (OrderItem orderItem : orderItems) {
+        orderItem.cancel();  // 재고 수량 원상복구
+    }
+
+}
 
 
 }

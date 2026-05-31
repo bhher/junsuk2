@@ -19,7 +19,8 @@ public class SecurityConfig {
 //                .csrf(csrf->csrf.disable())
                 .formLogin(form -> form
                         .loginPage("/members/login")
-                        .defaultSuccessUrl("/")
+                        .loginProcessingUrl("/members/login")
+                        .defaultSuccessUrl("/", true)
                         .usernameParameter("email")
                         .failureUrl("/members/login/error")
                         .permitAll()
