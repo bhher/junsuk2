@@ -39,8 +39,8 @@ fun AddEditScreen(
     var category by remember { mutableStateOf(ExpenseCategories.expense.first()) }
     var memo by remember { mutableStateOf("") }
 
-    LaunchedEffect(expenseId) {
-        if (expenseId != null) {
+    LaunchedEffect(expenseId) { //입력창 자동 채움
+        if (expenseId != null) { //let 데이터가 있으면 실행
             viewModel.getExpense(expenseId)?.let { expense ->
                 title = expense.title
                 amountText = expense.amount.toString()
@@ -51,8 +51,8 @@ fun AddEditScreen(
         }
     }
 
-    LaunchedEffect(type) {
-        val categories = ExpenseCategories.forType(type)
+    LaunchedEffect(type) { // 수입 / 지출 자동감지
+        val categories = ExpenseCategories.forType(type) //수입 - 급여,부수입,기타  지출 - 식비 교통 쇼핑 주거 기타
         if (category !in categories) {
             category = categories.first()
         }
@@ -60,7 +60,7 @@ fun AddEditScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(if (expenseId == null) "등록" else "수정") })
+            TopAppBar(title = { Text(if (expenseId == null) "등록" else "수정") }) //상단 제목
         },
     ) { innerPadding ->
         Column(
@@ -98,7 +98,7 @@ fun AddEditScreen(
                 singleLine = true,
             )
 
-            Text("카테고리")
+            Text("카테고리") //수입 - 카테고리 - 급여,부수입 기타
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ExpenseCategories.forType(type).forEach { item ->
                     FilterChip(

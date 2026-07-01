@@ -106,7 +106,7 @@ val uiState : StateFlow<ExpenseUiState> = combine( //4개합치기
         if (trimmedTitle.isEmpty() || amount <= 0) return
 
         viewModelScope.launch {
-            if (id == null) {
+            if (id == null) { //id 새데이터
                 repository.insert(
                     Expense(
                         title = trimmedTitle,

@@ -51,7 +51,7 @@ fun HomeScreen(
     viewModel: ExpenseViewModel,
     navController: NavController,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState() //viewModel 가져옴
 
     Scaffold(
         topBar = {
@@ -74,25 +74,32 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-            ) {
+            ) {//월이동
                 TextButton(onClick = { viewModel.previousMonth() }) { Text("◀") }
                 Text(monthLabel(uiState.year, uiState.month), style = MaterialTheme.typography.titleMedium)
                 TextButton(onClick = { viewModel.nextMonth() }) { Text("▶") }
             }
 
-            OutlinedTextField(
+            OutlinedTextField(//검색
                 value = uiState.searchQuery,
                 onValueChange = { viewModel.setSearchQuery(it) },
                 label = { Text("검색 (제목·카테고리·메모)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-            )
+            ) //검색어를 viewModel에보관 -> 목록 합게타트에 즉시반영
 
-            SummaryRow(
-                income = uiState.totalIncome,
-                expense = uiState.totalExpense,
-                balance = uiState.balance,
+            //ExpenseViewModel
+            SummaryRow( //수입 /지출 / 잔액 요약카드를 데이터 넘겨주는 코드
+                income = uiState.totalIncome, //현재월의 전체 수입
+                expense = uiState.totalExpense,//현재월의 전체 지출
+                balance = uiState.balance,  //수입 - 지출 = 잔액
             )
+//            ExpenseUiState(
+//                totalIncome = income,
+//                totalExpense = expense,
+//                balance = income - expense,
+//            )
+
 
             CategoryChart(categoryExpenses = uiState.categoryExpenses)
 
@@ -103,10 +110,10 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
-                LazyColumn(
+                LazyColumn( //보이는 것만 그림
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
+                ) {//리스트데이터를 반복
                     items(uiState.expenses, key = { it.id }) { expense ->
                         ExpenseListItem(
                             expense = expense,
